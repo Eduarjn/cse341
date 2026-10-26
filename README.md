@@ -13,6 +13,7 @@ A read-only web service built with Express and MongoDB that returns book data.
 | Method | Path         | Description              |
 | ------ | ------------ | ------------------------ |
 | GET    | `/`          | Health check             |
+| GET    | `/books`     | Return all books         |
 
 ## Seed data
 
