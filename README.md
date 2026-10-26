@@ -13,3 +13,9 @@ A read-only web service built with Express and MongoDB that returns book data.
 | Method | Path         | Description              |
 | ------ | ------------ | ------------------------ |
 | GET    | `/`          | Health check             |
+
+## Seed data
+
+Create the `books` collection in the `cse341-books-db` database with MongoDB Atlas
+Data Explorer and insert the documents from `scripts/books.seed.json`
+(Insert Document → JSON view → paste the array).
