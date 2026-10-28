@@ -14,6 +14,7 @@ A read-only web service built with Express and MongoDB that returns book data.
 | ------ | ------------ | ------------------------ |
 | GET    | `/`          | Health check             |
 | GET    | `/books`     | Return all books         |
+| GET    | `/books/:id` | Return one book by `id`  |
 
 ## Seed data
 
