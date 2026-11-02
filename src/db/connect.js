@@ -34,4 +34,13 @@ const getDb = () => {
   return db;
 };
 
-export { connectToDb, getDb };
+// Closes the connection (used by the automated tests)
+const closeDb = async () => {
+  if (client) {
+    await client.close();
+  }
+  client = undefined;
+  db = undefined;
+};
+
+export { connectToDb, getDb, closeDb };

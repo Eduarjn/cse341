@@ -1,0 +1,95 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CSE 341 Books API",
+    "version": "2.0.0",
+    "description": "Books and authors stored in MongoDB. Errors always return a JSON body with a `message`."
+  },
+  "servers": [
+    { "url": "/", "description": "Same host that serves this page (local or Render)" }
+  ],
+  "tags": [
+    { "name": "Books", "description": "Books in the library" }
+  ],
+  "paths": {
+    "/books": {
+      "get": {
+        "tags": ["Books"],
+        "summary": "List all books",
+        "description": "Returns every book, sorted by id.",
+        "responses": {
+          "200": {
+            "description": "Array of books",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Book" } }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "tags": ["Books"],
+        "summary": "Get one book by id",
+        "parameters": [{ "$ref": "#/components/parameters/BookId" }],
+        "responses": {
+          "200": {
+            "description": "The book",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Book" } } }
+          },
+          "404": { "$ref": "#/components/responses/BookNotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "BookId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Book id, for example `b1`",
+        "schema": { "type": "string", "example": "b1" }
+      }
+    },
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "b1" },
+          "author": { "type": "string", "example": "Maya Rivera" },
+          "title": { "type": "string", "example": "Patterns of Light" },
+          "publicationDate": { "type": "string", "format": "date", "example": "2021-08-17" }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "properties": { "message": { "type": "string" } }
+      }
+    },
+    "responses": {
+      "BookNotFound": {
+        "description": "No book has this id",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Message" },
+            "example": { "message": "Book not found" }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Unexpected error (details are only written to the server log)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Message" },
+            "example": { "message": "Internal server error" }
+          }
+        }
+      }
+    }
+  }
+}
