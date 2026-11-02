@@ -83,6 +83,26 @@ describe('Authors API', () => {
     assert.equal(again.status, 404);
   });
 
+  test('GET /authors/:id/books lists the books of one author', async () => {
+    const response = await call('GET', '/authors/a1/books');
+    assert.equal(response.status, 200);
+    assert.deepEqual(response.body.map((book) => book.id), ['b1']);
+
+    const missing = await call('GET', '/authors/zzz/books');
+    assert.equal(missing.status, 404);
+  });
+
+  test('DELETE /authors/:id returns 409 while books reference the author', async () => {
+    const conflict = await call('DELETE', '/authors/a1');
+    assert.equal(conflict.status, 409);
+    assert.deepEqual(conflict.body, { message: 'Author has books; delete or reassign them first', bookIds: ['b1'] });
+    assert.equal((await call('GET', '/authors/a1')).status, 200); // the author is still there
+
+    await call('DELETE', '/books/b1');
+    const deleted = await call('DELETE', '/authors/a1');
+    assert.equal(deleted.status, 204);
+  });
+
   test('a database failure returns 500 with a safe message', async () => {
     await closeDb();
     try {
