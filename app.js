@@ -17,4 +17,13 @@ app.get('/', (req, res) => {
   return res.status(200).json({ message: 'Server is running' });
 });
 
+// Errors thrown before a controller runs (for example, a body that is not valid JSON)
+app.use((error, req, res, next) => {
+  if (error.type === 'entity.parse.failed') {
+    return res.status(400).json({ message: 'Invalid JSON body' });
+  }
+  console.error(`${req.method} ${req.path} failed:`, error.message);
+  return res.status(500).json({ message: 'Internal server error' });
+});
+
 export default app;

@@ -23,6 +23,11 @@ const connectToDb = async () => {
   client = new MongoClient(uri);
   await client.connect();
   db = client.db(dbName);
+  // ids are created by the API, so the database guarantees they stay unique
+  await Promise.all([
+    db.collection('books').createIndex({ id: 1 }, { unique: true }),
+    db.collection('authors').createIndex({ id: 1 }, { unique: true }),
+  ]);
   console.log(`Connected to MongoDB database: ${dbName}`);
   return db;
 };
