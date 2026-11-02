@@ -6,15 +6,27 @@
     "description": "Books and authors stored in MongoDB. Errors always return a JSON body with a `message`."
   },
   "servers": [
-    { "url": "/", "description": "Same host that serves this page (local or Render)" }
+    {
+      "url": "/",
+      "description": "Same host that serves this page (local or Render)"
+    }
   ],
   "tags": [
-    { "name": "Books", "description": "Books in the library" }
+    {
+      "name": "Books",
+      "description": "Books in the library"
+    },
+    {
+      "name": "Authors",
+      "description": "Authors referenced by books through authorId"
+    }
   ],
   "paths": {
     "/books": {
       "get": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "summary": "List all books",
         "description": "Returns every book, sorted by id.",
         "responses": {
@@ -22,26 +34,229 @@
             "description": "Array of books",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Book" } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Book"
+                  }
+                }
               }
             }
           },
-          "500": { "$ref": "#/components/responses/ServerError" }
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
         }
       }
     },
     "/books/{id}": {
       "get": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "summary": "Get one book by id",
-        "parameters": [{ "$ref": "#/components/parameters/BookId" }],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BookId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "The book",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Book" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
           },
-          "404": { "$ref": "#/components/responses/BookNotFound" },
-          "500": { "$ref": "#/components/responses/ServerError" }
+          "404": {
+            "$ref": "#/components/responses/BookNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/authors": {
+      "get": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "List all authors",
+        "description": "Returns every author, sorted by id.",
+        "responses": {
+          "200": {
+            "description": "Array of authors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Author"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Create an author",
+        "description": "The server creates the id (`a` + next number). Text is trimmed; unknown fields and `id` are ignored.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorInput"
+              },
+              "example": {
+                "name": "Chimamanda Ngozi Adichie",
+                "nationality": "Nigerian"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Author created",
+            "headers": {
+              "Location": {
+                "description": "URL of the new author",
+                "schema": {
+                  "type": "string",
+                  "example": "/authors/a4"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Author"
+                },
+                "example": {
+                  "id": "a4",
+                  "name": "Chimamanda Ngozi Adichie",
+                  "nationality": "Nigerian"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/authors/{id}": {
+      "get": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Get one author by id",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The author",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Author"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthorNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Update an author (full update)",
+        "description": "Send every field: a field left out is removed (for example `nationality`). The id cannot change.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorInput"
+              },
+              "example": {
+                "name": "Maya Rivera",
+                "nationality": "Mexican-American"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Author updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Author"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthorNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Delete an author",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Author deleted (no body)"
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthorNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
         }
       }
     }
@@ -53,22 +268,106 @@
         "in": "path",
         "required": true,
         "description": "Book id, for example `b1`",
-        "schema": { "type": "string", "example": "b1" }
+        "schema": {
+          "type": "string",
+          "example": "b1"
+        }
+      },
+      "AuthorId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Author id, for example `a1`",
+        "schema": {
+          "type": "string",
+          "example": "a1"
+        }
       }
     },
     "schemas": {
       "Book": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "example": "b1" },
-          "author": { "type": "string", "example": "Maya Rivera" },
-          "title": { "type": "string", "example": "Patterns of Light" },
-          "publicationDate": { "type": "string", "format": "date", "example": "2021-08-17" }
+          "id": {
+            "type": "string",
+            "example": "b1"
+          },
+          "author": {
+            "type": "string",
+            "example": "Maya Rivera"
+          },
+          "title": {
+            "type": "string",
+            "example": "Patterns of Light"
+          },
+          "publicationDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2021-08-17"
+          }
         }
       },
       "Message": {
         "type": "object",
-        "properties": { "message": { "type": "string" } }
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Author": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "a1"
+          },
+          "name": {
+            "type": "string",
+            "example": "Maya Rivera"
+          },
+          "nationality": {
+            "type": "string",
+            "example": "American"
+          }
+        }
+      },
+      "AuthorInput": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Maya Rivera"
+          },
+          "nationality": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "American"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "name is required"
+            ]
+          }
+        }
       }
     },
     "responses": {
@@ -76,8 +375,12 @@
         "description": "No book has this id",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/Message" },
-            "example": { "message": "Book not found" }
+            "schema": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "example": {
+              "message": "Book not found"
+            }
           }
         }
       },
@@ -85,8 +388,52 @@
         "description": "Unexpected error (details are only written to the server log)",
         "content": {
           "application/json": {
-            "schema": { "$ref": "#/components/schemas/Message" },
-            "example": { "message": "Internal server error" }
+            "schema": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "example": {
+              "message": "Internal server error"
+            }
+          }
+        }
+      },
+      "AuthorNotFound": {
+        "description": "No author has this id",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "example": {
+              "message": "Author not found"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "The body is not valid JSON or a field is invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "examples": {
+              "validation": {
+                "summary": "A field is invalid",
+                "value": {
+                  "message": "Validation failed",
+                  "errors": [
+                    "name is required"
+                  ]
+                }
+              },
+              "invalidJson": {
+                "summary": "The body is not valid JSON",
+                "value": {
+                  "message": "Invalid JSON body"
+                }
+              }
+            }
           }
         }
       }

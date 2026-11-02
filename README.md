@@ -15,13 +15,18 @@ A web service built with Express and MongoDB that returns book data, documented 
 | GET    | `/`          | Health check             |
 | GET    | `/books`     | Return all books         |
 | GET    | `/books/:id` | Return one book by `id`  |
+| GET    | `/authors`     | Return all authors |
+| GET    | `/authors/:id` | Return one author by `id` |
+| POST   | `/authors`     | Create an author (201, `Location` header) |
+| PUT    | `/authors/:id` | Replace an author (full update) |
+| DELETE | `/authors/:id` | Delete an author (204) |
 | GET    | `/api-docs`  | Swagger UI (try every route) |
 
 ## Seed data
 
-Create the `books` collection in the `cse341-books-db` database with MongoDB Atlas
-Data Explorer and insert the documents from `scripts/books.seed.json`
-(Insert Document → JSON view → paste the array).
+Create the `books` and `authors` collections in the `cse341-books-db` database with MongoDB
+Atlas Data Explorer and insert the documents from `scripts/books.seed.json` and
+`scripts/authors.seed.json` (Insert Document → JSON view → paste the array).
 
 ## API documentation
 
