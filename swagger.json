@@ -28,7 +28,7 @@
           "Books"
         ],
         "summary": "List all books",
-        "description": "Returns every book, sorted by id.",
+        "description": "Returns every book, sorted by id. `authorId` points to `/authors/{id}`.",
         "responses": {
           "200": {
             "description": "Array of books",
@@ -42,6 +42,61 @@
                 }
               }
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Create a book",
+        "description": "The server creates the id (`b` + next number). `authorId` must be an existing author. Text is trimmed; unknown fields and `id` are ignored.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookInput"
+              },
+              "example": {
+                "title": "The Lighthouse Keeper",
+                "authorId": "a1",
+                "publicationDate": "2024-05-10"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Book created",
+            "headers": {
+              "Location": {
+                "description": "URL of the new book",
+                "schema": {
+                  "type": "string",
+                  "example": "/books/b4"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                },
+                "example": {
+                  "id": "b4",
+                  "title": "The Lighthouse Keeper",
+                  "authorId": "a1",
+                  "publicationDate": "2024-05-10"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BookBadRequest"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
@@ -70,6 +125,76 @@
                 }
               }
             }
+          },
+          "404": {
+            "$ref": "#/components/responses/BookNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Update a book (full update)",
+        "description": "Send every field. The id cannot change; `authorId` must be an existing author.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BookId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookInput"
+              },
+              "example": {
+                "title": "Patterns of Light (2nd edition)",
+                "authorId": "a1",
+                "publicationDate": "2022-01-10"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Book updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Book"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BookBadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/BookNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Delete a book",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BookId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Book deleted (no body)"
           },
           "404": {
             "$ref": "#/components/responses/BookNotFound"
@@ -254,6 +379,51 @@
           "404": {
             "$ref": "#/components/responses/AuthorNotFound"
           },
+          "409": {
+            "description": "The author still has books",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorHasBooks"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        },
+        "description": "An author who still has books is not deleted: delete or reassign the books first."
+      }
+    },
+    "/authors/{id}/books": {
+      "get": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "List the books of one author",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Books whose authorId is this author (empty array if none)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Book"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthorNotFound"
+          },
           "500": {
             "$ref": "#/components/responses/ServerError"
           }
@@ -292,13 +462,14 @@
             "type": "string",
             "example": "b1"
           },
-          "author": {
-            "type": "string",
-            "example": "Maya Rivera"
-          },
           "title": {
             "type": "string",
             "example": "Patterns of Light"
+          },
+          "authorId": {
+            "type": "string",
+            "description": "id of the book's author",
+            "example": "a1"
           },
           "publicationDate": {
             "type": "string",
@@ -368,6 +539,51 @@
             ]
           }
         }
+      },
+      "BookInput": {
+        "type": "object",
+        "required": [
+          "title",
+          "authorId",
+          "publicationDate"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "example": "The Lighthouse Keeper"
+          },
+          "authorId": {
+            "type": "string",
+            "description": "Must be the id of an existing author",
+            "example": "a1"
+          },
+          "publicationDate": {
+            "type": "string",
+            "format": "date",
+            "description": "YYYY-MM-DD",
+            "example": "2024-05-10"
+          }
+        }
+      },
+      "AuthorHasBooks": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Author has books; delete or reassign them first"
+          },
+          "bookIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "b1"
+            ]
+          }
+        }
       }
     },
     "responses": {
@@ -424,6 +640,43 @@
                   "message": "Validation failed",
                   "errors": [
                     "name is required"
+                  ]
+                }
+              },
+              "invalidJson": {
+                "summary": "The body is not valid JSON",
+                "value": {
+                  "message": "Invalid JSON body"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BookBadRequest": {
+        "description": "The body is not valid JSON, a field is invalid or authorId does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "examples": {
+              "validation": {
+                "summary": "A field is invalid",
+                "value": {
+                  "message": "Validation failed",
+                  "errors": [
+                    "title is required",
+                    "publicationDate must be a real calendar date"
+                  ]
+                }
+              },
+              "unknownAuthor": {
+                "summary": "authorId does not exist",
+                "value": {
+                  "message": "Validation failed",
+                  "errors": [
+                    "authorId does not match an existing author"
                   ]
                 }
               },

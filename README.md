@@ -15,18 +15,23 @@ A web service built with Express and MongoDB that returns book data, documented 
 | GET    | `/`          | Health check             |
 | GET    | `/books`     | Return all books         |
 | GET    | `/books/:id` | Return one book by `id`  |
+| POST   | `/books`     | Create a book (201, `Location` header; `authorId` must exist) |
+| PUT    | `/books/:id` | Replace a book (full update) |
+| DELETE | `/books/:id` | Delete a book (204) |
 | GET    | `/authors`     | Return all authors |
 | GET    | `/authors/:id` | Return one author by `id` |
 | POST   | `/authors`     | Create an author (201, `Location` header) |
 | PUT    | `/authors/:id` | Replace an author (full update) |
-| DELETE | `/authors/:id` | Delete an author (204) |
+| DELETE | `/authors/:id` | Delete an author (204; 409 while books reference it) |
+| GET    | `/authors/:id/books` | Return the books of one author |
 | GET    | `/api-docs`  | Swagger UI (try every route) |
 
 ## Seed data
 
-Create the `books` and `authors` collections in the `cse341-books-db` database with MongoDB
-Atlas Data Explorer and insert the documents from `scripts/books.seed.json` and
-`scripts/authors.seed.json` (Insert Document → JSON view → paste the array).
+`npm run seed` upserts `scripts/authors.seed.json` and `scripts/books.seed.json` into the
+database in `.env`. It also converts the Week 01 books (`author` text) to the Week 02 model
+(`authorId` referencing `authors.id`). Books and authors are specified in
+[`docs/week02-spec.md`](docs/week02-spec.md).
 
 ## API documentation
 
